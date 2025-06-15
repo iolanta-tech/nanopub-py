@@ -291,6 +291,15 @@ def from_assertion(
             help='Path to the assertion graph file, or standard input.',
         )
     ] = None,
+    input_format: Annotated[
+        DataFormat | None,
+        Option(
+            help=(
+                'Format of the assertion graph file. '
+                'If not provided, the format will be inferred.'
+            )
+        )
+    ] = None,
     was_derived_from: Annotated[
         str | None,
         Option(
@@ -312,7 +321,10 @@ def from_assertion(
     )
 
     np = Nanopub(
-        assertion=rdflib.Graph().parse(filepath),
+        assertion=rdflib.Graph().parse(
+            filepath,
+            format=input_format and input_format.value,
+        ),
         conf=config,
     )
 
