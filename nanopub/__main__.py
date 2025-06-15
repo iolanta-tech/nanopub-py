@@ -2,6 +2,7 @@
 import os
 import re
 import shutil
+import sys
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -282,7 +283,14 @@ cli.add_typer(create, name='create')
 @create.command(help='Create a nanopub from an assertion graph')
 def from_assertion(
     ctx: CreateNanopubContext,
-    filepath: Annotated[Path, Argument(exists=True, dir_okay=False)],
+    filepath: Annotated[
+        Path | None,
+        Argument(
+            exists=True,
+            dir_okay=False,
+            help='Path to the assertion graph file, or standard input.',
+        )
+    ] = None,
     was_derived_from: Annotated[
         str | None,
         Option(
@@ -293,6 +301,9 @@ def from_assertion(
     ] = None,
 ):
     """Create a nanopublication based on assertion."""
+    if filepath is None:
+        filepath = sys.stdin
+
     config = NanopubConf(
         profile=load_profile(),
         derived_from=was_derived_from,
