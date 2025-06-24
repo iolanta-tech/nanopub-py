@@ -3,24 +3,23 @@ from nanopub import NanopubClient, Nanopub
 from nanopub.fdo.utils import looks_like_handle
 from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo import FdoNanopub
-from rdflib import RDF, URIRef
-from nanopub.namespaces import FDOF, FDOC
+from rdflib import RDF, URIRef, Graph
+from nanopub.namespaces import FDOF
 
 def resolve_id(iri_or_handle: str) -> FdoRecord:
     try:
         np = resolve_in_nanopub_network(iri_or_handle)
         if np is not None:
-            return FdoRecord(np.assertion)
+            return FdoRecord(nanopub=np.assertion)
 
         if looks_like_handle(iri_or_handle):
             np = FdoNanopub.handle_to_nanopub(iri_or_handle)
-            return FdoRecord(np.assertion)
+            return FdoRecord(nanopub=np.assertion)
 
-        from rdflib import URIRef
         if iri_or_handle.startswith("https://hdl.handle.net/"):
             handle = iri_or_handle.replace("https://hdl.handle.net/", "")
             np = FdoNanopub.handle_to_nanopub(handle)
-            return FdoRecord(np.assertion)
+            return FdoRecord(nanopub=np.assertion)
 
     except Exception as e:
         raise ValueError(f"Could not resolve FDO: {iri_or_handle}") from e
@@ -50,13 +49,21 @@ def resolve_in_nanopub_network(fdo_id: str):
 def retrieve_record_from_id(iri_or_handle: str):
     if looks_like_handle(iri_or_handle):
         np = FdoNanopub.handle_to_nanopub(iri_or_handle)
-        return FdoRecord(np.assertion)
+        return FdoRecord(nanopub=np.assertion)
     else:
         raise NotImplementedError("Non-handle IRIs not yet supported")
 
 
-def retrieve_content_from_id(iri_or_handle: str):
-    raise NotImplementedError("Not implemented yet")
+def retrieve_content_from_id(iri_or_handle: str) -> bytes:
+    fdo = resolve_id(iri_or_handle)
+
+    content_url = fdo.get_data_ref()
+    if not content_url:
+        raise ValueError("FDO has no file / DataRef (isMaterializedBy)")
+
+    response = requests.get(str(content_url))
+    response.raise_for_status()
+    return response.content
 
 
 def resolve_handle_metadata(handle: str) -> dict:
@@ -65,7 +72,11 @@ def resolve_handle_metadata(handle: str) -> dict:
     response.raise_for_status()
     return response.json()
 
-def get_fdo_uri_from_fdo_record(fdo_record: FdoRecord) -> URIRef:
-    if not fdo_record.id:
-        raise ValueError("FDO Record has no ID")
-    return URIRef(f"https://hdl.handle.net/{fdo_record.id}")
+def get_fdo_uri_from_fdo_record(assertion_graph: Graph) -> URIRef | None:
+    for s, p, o in assertion_graph.triples((None, RDF.type, FDOF.FAIRDigitalObject)):
+        if isinstance(s, URIRef):
+            return s
+    for s in assertion_graph.subjects():
+        if isinstance(s, URIRef):
+            return s
+    return None
