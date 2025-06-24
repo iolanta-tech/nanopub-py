@@ -4,18 +4,24 @@ from nanopub.fdo.fdo_nanopub import FdoNanopub
 from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo.retrieve import get_fdo_uri_from_fdo_record
 
-def update_record(fdoNanopub: FdoNanopub, record: FdoRecord) -> URIRef:
-    fdo_record = fdoNanopub.assertion
-    subject_uri = get_fdo_uri_from_fdo_record(fdo_record)
-    for p, o in list(fdo_record.predicate_objects(subject=subject_uri)):
-        fdo_record.remove((subject_uri, p, o))
+def update_record(fdo_nanopub: FdoNanopub, record: FdoRecord) -> URIRef:
+    """
+    Update the assertion graph of the given FdoNanopub using triples from the provided FdoRecord.
+    Then update the nanopub.
+
+    Returns the source URI of the updated nanopub.
+    """
+    assertion_graph = fdo_nanopub.assertion
+    subject_uri = get_fdo_uri_from_fdo_record(assertion_graph)
+    if subject_uri is None:
+        raise ValueError("Could not find subject URI in the FdoNanopub assertion graph.")
+
+    for p, o in list(assertion_graph.predicate_objects(subject=subject_uri)):
+        assertion_graph.remove((subject_uri, p, o))
+
     for triple in record.get_statements():
-        fdo_record.add(triple)
-    fdoNanopub.update()
-    return fdoNanopub.source_uri
+        assertion_graph.add(triple)
 
-def update_content(handle: str, content: bytes) -> None:
-#    TODO: Not implemented yet
-   raise NotImplementedError("Not implemented yet")
+    fdo_nanopub.update()
 
-   
+    return fdo_nanopub.source_uri
