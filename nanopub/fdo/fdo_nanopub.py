@@ -1,8 +1,10 @@
 from nanopub import Nanopub
 import rdflib
-from rdflib.namespace import RDF, RDFS, XSD
+from typing import Optional
+from rdflib.namespace import RDF, RDFS, DCTERMS
 from nanopub.namespaces import HDL, FDOF, NPX, FDOC
 from nanopub.constants import FDO_PROFILE_HANDLE, FDO_DATA_REF_HANDLE
+from nanopub.fdo.fdo_record import FdoRecord
 
 
 def to_hdl_uri(value):
@@ -31,7 +33,7 @@ class FdoNanopub(Nanopub):
         self.assertion.add((self.fdo_uri, FDOF.hasMetadata, self.metadata.np_uri))
         if self.fdo_profile:
             profile_uri = to_hdl_uri(self.fdo_profile)
-            self.assertion.add((self.fdo_uri, FDOC.hasFdoProfile, profile_uri))
+            self.assertion.add((self.fdo_uri, DCTERMS.conformsTo, profile_uri))
 
         self.pubinfo.add((self.metadata.np_uri, RDFS.label, rdflib.Literal(f"FAIR Digital Object: {label}")))
         self.pubinfo.add((self.metadata.np_uri, NPX.introduces, self.fdo_uri))
@@ -43,7 +45,7 @@ class FdoNanopub(Nanopub):
         values = data.get("values", [])
 
         label = None
-        profile = None
+        fdo_profile = None
         data_ref = None
         other_attributes = []
 
@@ -56,13 +58,13 @@ class FdoNanopub(Nanopub):
             elif entry_type == "name":
                 label = entry_value
             elif entry_type == FDO_PROFILE_HANDLE:
-                profile = entry_value
+                fdo_profile = entry_value
             elif entry_type == FDO_DATA_REF_HANDLE:
                 data_ref = entry_value
             else:
                 other_attributes.append((entry_type, entry_value))
 
-        np = cls(fdo_id=handle, label=label or handle, fdo_profile=profile, **kwargs)
+        np = cls(fdo_id=handle, label=label or handle, fdo_profile=fdo_profile, **kwargs)
 
         if data_ref:
             np.add_fdo_data_ref(data_ref)
@@ -73,14 +75,29 @@ class FdoNanopub(Nanopub):
         return np
       
     @classmethod
-    def create_with_fdo_iri(cls, fdo_iri, profile_iri, label):
-        fdo_uri = rdflib.URIRef(fdo_iri) if not isinstance(fdo_iri, rdflib.URIRef) else fdo_iri
-        profile_uri = rdflib.URIRef(profile_iri) if not isinstance(profile_iri, rdflib.URIRef) else profile_iri
-        return cls(fdo_id=fdo_uri, label=label, fdo_profile=profile_uri)
+    def create_with_fdo_iri(cls, fdo_record: FdoRecord, fdo_iri: rdflib.URIRef | str, data_ref: Optional[rdflib.URIRef] = None, *args, **kwargs) -> "FdoNanopub":
+        if isinstance(fdo_iri, str):
+            fdo_iri = rdflib.URIRef(fdo_iri)  # Ensure fdo_iri is a URIRef
+        label = fdo_record.get_label() or str(fdo_iri)
+        profile = fdo_record.get_profile()
+
+        np = cls(fdo_id=fdo_iri, label=label, fdo_profile=profile, *args, **kwargs)
+
+        if data_ref:
+            np.add_fdo_data_ref(data_ref)
+
+        skip_preds = {RDFS.label, DCTERMS.conformsTo, FDOC.hasFdoProfile, FDOF.isMaterializedBy}
+        for predicate, obj in fdo_record.tuples.items():
+            if predicate not in skip_preds:
+                np.assertion.add((fdo_iri, predicate, obj))
+
+        return np
+
+
 
     def add_fdo_profile(self, profile_uri: rdflib.URIRef | str):
         profile_uri = to_hdl_uri(profile_uri)
-        self.assertion.add((self.fdo_uri, FDOC.hasFdoProfile, profile_uri))
+        self.assertion.add((self.fdo_uri, DCTERMS.conformsTo, profile_uri))
         self.pubinfo.add((HDL[FDO_PROFILE_HANDLE], RDFS.label, rdflib.Literal("FdoProfile")))
 
     def add_fdo_data_ref(self, data_ref: rdflib.Literal | str):
