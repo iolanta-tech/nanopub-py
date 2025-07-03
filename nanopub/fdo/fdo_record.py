@@ -33,7 +33,7 @@ class FdoRecord:
             if self.id is None:
                 raise ValueError("Missing required FDO profile statement")
 
-        else:
+        if nanopub is None:
             # Init from explicit params
             if profile_uri is None:
                 raise ValueError("profile_uri is required when nanopub assertion graph not given")

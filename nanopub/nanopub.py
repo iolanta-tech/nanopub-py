@@ -198,7 +198,7 @@ class Nanopub:
         if not self.source_uri:
             self.sign()
 
-        publish_graph(self.rdf, use_server=self._conf.use_server)
+        publish_graph(self.rdf, use_server=self._conf.use_server)    
         log.info(f'Published {self.source_uri} to {self._conf.use_server}')
         self.published = True
 
@@ -227,7 +227,7 @@ class Nanopub:
         ))
         self._metadata = extract_np_metadata(self._rdf)
         if publish:
-            self.publish()
+            return self.publish()
         else:
             self.sign()
 

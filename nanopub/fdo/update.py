@@ -1,27 +1,39 @@
-from rdflib import URIRef
-from nanopub.namespaces import FDOF
+from typing import Tuple, Optional
 from nanopub.fdo.fdo_nanopub import FdoNanopub
 from nanopub.fdo.fdo_record import FdoRecord
-from nanopub.fdo.retrieve import get_fdo_uri_from_fdo_record
+from nanopub.fdo.retrieve import resolve_in_nanopub_network
+from nanopub.nanopub_conf import NanopubConf
 
-def update_record(fdo_nanopub: FdoNanopub, record: FdoRecord) -> URIRef:
+
+def update_record(
+    fdo_iri: str,
+    record: FdoRecord,
+    publish: bool,
+    conf: NanopubConf
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
-    Update the assertion graph of the given FdoNanopub using triples from the provided FdoRecord.
-    Then update the nanopub.
-
-    Returns the source URI of the updated nanopub.
+    Update or create an FDO nanopub depending on whether a source nanopub URI is resolvable
+    and signed with our current profile key.
     """
-    assertion_graph = fdo_nanopub.assertion
-    subject_uri = get_fdo_uri_from_fdo_record(assertion_graph)
-    if subject_uri is None:
-        raise ValueError("Could not find subject URI in the FdoNanopub assertion graph.")
+    existing_npub = resolve_in_nanopub_network(fdo_iri, conf=conf)
 
-    for p, o in list(assertion_graph.predicate_objects(subject=subject_uri)):
-        assertion_graph.remove((subject_uri, p, o))
+    if existing_npub:
+        existing_pubkey = existing_npub.signed_with_public_key
+        current_pubkey = conf.profile.public_key if conf.profile else None
 
-    for triple in record.get_statements():
-        assertion_graph.add(triple)
+        if str(existing_pubkey) == str(current_pubkey):
 
-    fdo_nanopub.update()
+            existing_npub.assertion.remove((None, None, None))
+            for triple in record.get_graph():
+                existing_npub.assertion.add(triple)
 
-    return fdo_nanopub.source_uri
+            return existing_npub.update(publish=publish)
+
+    else:
+        npub = FdoNanopub.create_with_fdo_iri(
+            fdo_record=record,
+            fdo_iri=fdo_iri,
+            data_ref=record.get_data_ref(),
+            conf=conf
+        )
+        return npub.publish() if publish else (None, None, None)
