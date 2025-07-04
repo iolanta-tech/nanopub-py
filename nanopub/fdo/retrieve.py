@@ -7,21 +7,21 @@ from rdflib import RDF, URIRef, Graph
 from nanopub.namespaces import FDOF
 from typing import Tuple, Optional
 
-def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> Tuple[FdoRecord, Optional[str]]:
+def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> FdoRecord:
     try:
         np = resolve_in_nanopub_network(iri_or_handle, conf=conf)
         if np is not None:
             record = FdoRecord(nanopub=np.assertion)
-            return record, str(np.source_uri)
+            return record
 
         if looks_like_handle(iri_or_handle):
             np = FdoNanopub.handle_to_nanopub(iri_or_handle)
-            return FdoRecord(nanopub=np.assertion), str(np.source_uri)
+            return FdoRecord(nanopub=np.assertion)
 
         if iri_or_handle.startswith("https://hdl.handle.net/"):
             handle = iri_or_handle.replace("https://hdl.handle.net/", "")
             np = FdoNanopub.handle_to_nanopub(handle)
-            return FdoRecord(nanopub=np.assertion), str(np.source_uri)
+            return FdoRecord(nanopub=np.assertion)
 
     except Exception as e:
         raise ValueError(f"Could not resolve FDO: {iri_or_handle}") from e
@@ -45,8 +45,11 @@ def resolve_in_nanopub_network(iri_or_handle: str, conf: Optional[NanopubConf] =
             endpoint=endpoint,
             query_url=query_url,
         )
-        np_uri = data[0].get("np")
-        np = Nanopub(np_uri)
+        if not data:
+            return None
+        else:
+            np_uri = data[0].get("np")
+            np = Nanopub(np_uri)
     if np is not None:
         return np
     return None
@@ -62,7 +65,7 @@ def retrieve_record_from_id(iri_or_handle: str):
 
 
 def retrieve_content_from_id(iri_or_handle: str) -> bytes:
-    fdo_record, _ = resolve_id(iri_or_handle)
+    fdo_record = resolve_id(iri_or_handle)
 
     content_url = fdo_record.get_data_ref()
     if not content_url:
