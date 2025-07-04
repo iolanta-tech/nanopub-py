@@ -227,7 +227,7 @@ class Nanopub:
         ))
         self._metadata = extract_np_metadata(self._rdf)
         if publish:
-            return self.publish()
+            self.publish()
         else:
             self.sign()
 
