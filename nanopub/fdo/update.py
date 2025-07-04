@@ -3,6 +3,7 @@ from nanopub.fdo.fdo_nanopub import FdoNanopub
 from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo.retrieve import resolve_in_nanopub_network
 from nanopub.nanopub_conf import NanopubConf
+from nanopub import NanopubUpdate
 
 
 def update_record(
@@ -27,7 +28,13 @@ def update_record(
             for triple in record.get_graph():
                 existing_npub.assertion.add(triple)
 
-            return existing_npub.update(publish=publish)
+            new_np = NanopubUpdate(
+                uri=existing_npub.source_uri,
+                conf=conf,
+                assertion=existing_npub.assertion,
+            )
+            new_np.sign()
+            return new_np.publish() if publish else (None, None, None)
 
     else:
         npub = FdoNanopub.create_with_fdo_iri(
