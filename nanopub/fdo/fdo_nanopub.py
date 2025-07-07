@@ -84,7 +84,8 @@ class FdoNanopub(Nanopub):
                     data_ref: Optional[rdflib.URIRef] = None, 
                     conf: Optional[NanopubConf] = None,
                     ) -> "FdoNanopub":
-        
+        if conf is None:
+            conf = NanopubConf()
         if isinstance(fdo_iri, str):
             fdo_iri = rdflib.URIRef(fdo_iri) 
         label = fdo_record.get_label() or str(fdo_iri)
