@@ -104,6 +104,16 @@ class FdoRecord:
         pred = URIRef(predicate)
         obj = URIRef(value) if isinstance(value, str) and value.startswith("http") else Literal(value)
         self.tuples[pred] = obj
+        
+    def add_aggregate(self, iri: URIRef):
+        existing = self.tuples.get(DCTERMS.hasPart)
+        if existing:
+            if isinstance(existing, list):
+                existing.append(iri)
+            else:
+                self.tuples[DCTERMS.hasPart] = [existing, iri]
+        else:
+            self.tuples[DCTERMS.hasPart] = iri
 
     def copy(self) -> "FdoRecord":
         new_record = FdoRecord()

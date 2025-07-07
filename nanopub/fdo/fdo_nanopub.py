@@ -5,6 +5,8 @@ from rdflib.namespace import RDF, RDFS, DCTERMS
 from nanopub.namespaces import HDL, FDOF, NPX, FDOC
 from nanopub.constants import FDO_PROFILE_HANDLE, FDO_DATA_REF_HANDLE
 from nanopub.fdo.fdo_record import FdoRecord
+from nanopub.nanopub_conf import NanopubConf
+from nanopub.fdo.utils import looks_like_handle, looks_like_url, handle_to_iri
 
 
 def to_hdl_uri(value):
@@ -40,6 +42,7 @@ class FdoNanopub(Nanopub):
         
     @classmethod
     def handle_to_nanopub(cls, handle: str, **kwargs) -> "FdoNanopub":
+        # To prevent circular import issue
         from nanopub.fdo.retrieve import resolve_handle_metadata
         data = resolve_handle_metadata(handle)
         values = data.get("values", [])
@@ -75,24 +78,63 @@ class FdoNanopub(Nanopub):
         return np
       
     @classmethod
-    def create_with_fdo_iri(cls, fdo_record: FdoRecord, fdo_iri: rdflib.URIRef | str, data_ref: Optional[rdflib.URIRef] = None, *args, **kwargs) -> "FdoNanopub":
+    def create_with_fdo_iri(cls, 
+                    fdo_record: FdoRecord, 
+                    fdo_iri: rdflib.URIRef | str, 
+                    data_ref: Optional[rdflib.URIRef] = None, 
+                    conf: Optional[NanopubConf] = None,
+                    ) -> "FdoNanopub":
+        if conf is None:
+            conf = NanopubConf()
         if isinstance(fdo_iri, str):
-            fdo_iri = rdflib.URIRef(fdo_iri)  # Ensure fdo_iri is a URIRef
+            fdo_iri = rdflib.URIRef(fdo_iri) 
         label = fdo_record.get_label() or str(fdo_iri)
         profile = fdo_record.get_profile()
 
-        np = cls(fdo_id=fdo_iri, label=label, fdo_profile=profile, *args, **kwargs)
+        np = cls(fdo_id=fdo_iri, label=label, fdo_profile=profile, conf=conf)
 
         if data_ref:
             np.add_fdo_data_ref(data_ref)
 
         skip_preds = {RDFS.label, DCTERMS.conformsTo, FDOC.hasFdoProfile, FDOF.isMaterializedBy}
         for predicate, obj in fdo_record.tuples.items():
-            if predicate not in skip_preds:
+            if predicate in skip_preds:
+                continue
+
+            if isinstance(obj, list):
+                for o in obj:
+                    np.assertion.add((fdo_iri, predicate, o))
+            else:
                 np.assertion.add((fdo_iri, predicate, obj))
 
         return np
 
+    @classmethod
+    def create_aggregation_fdo(cls,
+                    fdo_iri: rdflib.URIRef | str,
+                    profile_uri: str,
+                    label: str,
+                    aggregates: list[str],
+                    conf: Optional[NanopubConf] = None,
+                    ) -> "FdoNanopub":
+
+        record = FdoRecord(profile_uri=profile_uri, label=label)
+
+        if record.get_data_ref():
+            raise ValueError("Aggregate FDOs cannot have a dataRef (isMaterializedBy)")
+
+        for agg in aggregates:
+            if looks_like_url(agg):
+                iri = rdflib.URIRef(agg)
+            elif looks_like_handle(agg):
+                iri = handle_to_iri(agg)
+            else:
+                raise ValueError(f"Invalid aggregate format: {agg}")
+            record.add_aggregate(iri)
+
+        npub = cls.create_with_fdo_iri(record, fdo_iri, conf=conf)
+
+        return npub
 
 
     def add_fdo_profile(self, profile_uri: rdflib.URIRef | str):
