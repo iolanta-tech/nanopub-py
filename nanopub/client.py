@@ -10,6 +10,7 @@ from io import StringIO
 
 import rdflib
 import requests
+from SPARQLWrapper import SPARQLWrapper, JSON, CSV
 
 from nanopub import namespaces
 from nanopub.definitions import (
@@ -334,3 +335,35 @@ class NanopubClient:
         csv_text = self._query_api_csv(params, endpoint=endpoint, query_url=query_url)
         reader = csv.DictReader(StringIO(csv_text))
         return list(reader)
+    
+    def query_sparql(self, query: str, return_format: str = "json") -> Union[List[dict], str]:
+        """
+        Run a raw SPARQL query against a nanopub server using SPARQLWrapper.
+
+        Args:
+            query (str): A valid SPARQL 1.1 query string.
+            return_format (str): One of "json" or "csv".
+
+        Returns:
+            List of dicts if return_format=json (default) or raw CSV string if return_format=csv.
+        """
+        if return_format not in {"json", "csv"}:
+            raise ValueError("return_format must be 'json' or 'csv'")
+        endpoints = ['https://query.knowledgepixels.com/repo/full'] # TODO: Consider adding more endpoints if needed
+        for endpoint_url in endpoints:
+            try:
+                sparql = SPARQLWrapper(endpoint_url)
+                sparql.setQuery(query)
+                sparql.setReturnFormat(JSON if return_format == "json" else CSV)
+                response = sparql.query().convert()
+
+                if return_format == "json":
+                    bindings = response["results"]["bindings"]
+                    return [{k: v["value"] for k, v in row.items()} for row in bindings]
+                else:
+                    return response.decode("utf-8") if isinstance(response, bytes) else response
+
+            except Exception as e:
+                warnings.warn(f"SPARQL query failed on {endpoint_url}: {e}")
+
+        raise RuntimeError("SPARQL query failed on all nanopub endpoints.")
