@@ -88,11 +88,20 @@ for s, p, o in publication.assertion:
 
 ```
 
+
 ## Development
 
 See the [development page](https://nanopublication.github.io/nanopub-py/getting-started/development/) on the documentation website.
+
 
 ## License
 
 nanopub-java is free software under the Apache License. See [LICENSE](LICENSE).
 
+
+## Copyright
+
+- Copyright (C) 2020 Robin Richardson, Sven van der Burg
+- Copyright (C) 2020-2025 the nanopub-py contributors (https://github.com/Nanopublication/nanopub-py/graphs/contributors)
+- Copyright (C) 2025 Knowledge Pixels
+- Copyright (C) 2025 Acatech
