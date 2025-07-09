@@ -6,8 +6,9 @@
 [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu)
 [![DOI](https://zenodo.org/badge/302247101.svg)](https://zenodo.org/badge/latestdoi/302247101)
 
-# nanopub
-The ```nanopub``` library provides a high-level, user-friendly python interface for searching, publishing and retracting nanopublications.
+# nanopub-py
+
+The ```nanopub-py``` library provides a high-level, user-friendly Python interface for searching, publishing and retracting nanopublications.
 
 Nanopublications are a formalized and machine-readable way of communicating the smallest possible units of publishable information. See [the documentation](https://nanopublication.github.io/nanopub-py/getting-started/what-are-nanopubs) for more information.
 
@@ -21,7 +22,7 @@ Install using pip:
 pip install nanopub
 ```
 
-To publish to the nanopub server you need to setup your profile. This allows the nanopub server to identify you. Run the following command in the terminal:
+To publish to the nanopublication network you need to setup your profile. This allows the nanopublication services to identify you. Run the following command in the terminal:
 ```
 np setup
 ```
@@ -90,3 +91,8 @@ for s, p, o in publication.assertion:
 ## Development
 
 See the [development page](https://nanopublication.github.io/nanopub-py/getting-started/development/) on the documentation website.
+
+## License
+
+nanopub-java is free software under the Apache License. See [LICENSE](LICENSE).
+
