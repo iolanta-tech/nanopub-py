@@ -1,6 +1,6 @@
-name: Tests and update docs
+name: Tests
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
 
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.12.4] 
+        python-version: [ 3.12.4 ]
         rdflib-version:
           - rdflib==6.0.2
           - rdflib>6.0.2,<7.0.0
@@ -45,27 +45,3 @@ jobs:
         run: |
           coverage xml
           coveralls
-
-
-  build-docs:
-    needs: [ tests ]
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.12.4
-
-      - name: Install dependencies
-        run: |
-          pip install ".[doc]"
-
-      - name: Deploy mkdocs on GitHub Pages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git pull
-          mkdocs gh-deploy
