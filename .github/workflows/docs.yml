@@ -30,4 +30,4 @@ jobs:
       - name: Deploy mkdocs on GitHub Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: run mkdocs gh-deploy --force
+        run: mkdocs gh-deploy --force
