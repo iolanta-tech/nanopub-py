@@ -4,7 +4,6 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nanopub"
-version= "1.0.0"
 description = "Python client for Nanopublications"
 readme = "README.md"
 requires-python = ">=3.12.4"
