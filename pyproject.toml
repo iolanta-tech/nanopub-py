@@ -70,11 +70,11 @@ np = "nanopub.__main__:cli"
 
 
 [project.urls]
-Homepage = "https://fair-workflows.github.io/nanopub"
-Documentation = "https://fair-workflows.github.io/nanopub"
-History = "https://github.com/fair-workflows/nanopub/releases"
-Tracker = "https://github.com/fair-workflows/nanopub/issues"
-Source = "https://github.com/fair-workflows/nanopub"
+Homepage = "https://nanopublication.github.io/nanopub-py/"
+Documentation = "https://nanopublication.github.io/nanopub-py/"
+History = "https://github.com/Nanopublication/nanopub-py/releases"
+Tracker = "https://github.com/Nanopublication/nanopub-py/issues"
+Source = "https://github.com/Nanopublication/nanopub-py"
 
 
 

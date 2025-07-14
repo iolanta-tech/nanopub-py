@@ -58,7 +58,7 @@ class JavaWrapper:
                                'If you want to publish a modified existing nanopublication '
                                'you need to do a few extra steps before you can publish. '
                                'See the discussion in: '
-                               'https://github.com/fair-workflows/nanopub/issues/110')
+                               'https://github.com/Nanopublication/nanopub-py/issues/110')
         elif result.returncode != 0:
             raise RuntimeError(f'Error in nanopub-java when running {command}: {stderr}')
 

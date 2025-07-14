@@ -3,7 +3,7 @@ site_description: Python client for Nanopublications
 site_author: Robin Richardson, Sven van der Burg, Vincent Emonet
 site_url: https://fair-workflows.github.io/nanopub
 repo_name: fair-workflows/nanopub
-repo_url: https://github.com/fair-workflows/nanopub
+repo_url: https://github.com/Nanopublication/nanopub-py
 edit_uri: "edit/main/docs/"
 copyright: Copyright &copy; 2020 Robin Richardson, Sven van der Burg
 
@@ -36,14 +36,14 @@ nav:
     - Client: reference/client.md
     - Namespaces: reference/namespaces.md
 
-  - "<span>Issues&nbsp;&nbsp;<i class='fa-solid fa-arrow-up-right-from-square'></i></span>": https://github.com/fair-workflows/nanopub/issues" target="_blank
+  - "<span>Issues&nbsp;&nbsp;<i class='fa-solid fa-arrow-up-right-from-square'></i></span>": https://github.com/Nanopublication/nanopub-py/issues" target="_blank
 # Icons: https://fontawesome.com/icons and https://squidfunk.github.io/mkdocs-material/reference/icons-emojis
 
 
 theme:
   name: "material"
-  favicon: assets/icon.png
-  logo: assets/icon.png
+  favicon: assets/nanopub-icon.svg
+  logo: assets/nanopub-icon.svg
   # icon:
   #   logo: material/microscope
   language: en
