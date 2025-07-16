@@ -6,7 +6,7 @@ from pathlib import Path
 
 import rdflib
 from Crypto.PublicKey import RSA
-from rdflib import ConjunctiveGraph
+from rdflib import Dataset
 
 from nanopub.definitions import ROOT_FILEPATH
 from nanopub.namespaces import NP
@@ -69,23 +69,22 @@ class JavaWrapper:
         with open(unsigned_file, "w") as f:
             f.write(np.rdf.serialize(format="trig"))
 
-        unsigned_file = str(unsigned_file)
-        args = ''
-        if self.private_key:
-            args = f'-k {self.private_key}'
-
+        args = f'-k {self.private_key}' if self.private_key else ''
         cmd = f'{NANOPUB_JAVA_SCRIPT} sign {unsigned_file} {args}'
-        # print(cmd)
         self._run_command(cmd)
+
         signed_file = self._get_signed_file(unsigned_file)
-        g = ConjunctiveGraph()
+        if not os.path.exists(signed_file):
+            raise RuntimeError(f"Signed file not created: {signed_file}")
+
+        g = Dataset()
         g.parse(signed_file, format="trig")
-        source_uri = str(list(
-            g.subjects(
-                predicate=rdflib.RDF.type, object=NP.Nanopublication
-            )
-        )[0])
-        return source_uri
+
+        np_uris = list(g.subjects(predicate=rdflib.RDF.type, object=NP.Nanopublication))
+        if not np_uris:
+            raise ValueError("No nanopublication found in signed file.")
+
+        return str(np_uris[0])
 
 
     def check_trusty_with_signature(self, np: Nanopub) -> str:
