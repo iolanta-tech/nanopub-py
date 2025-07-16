@@ -93,7 +93,7 @@ def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Dataset)
 
     # Iterate quads in the graph, and replace by the transformed value
     bnodemap: dict = {}
-    for s, p, o, c in graph.quads():
+    for s, p, o, c in graph.quads(None):
         if c:
             g = c
         else:
