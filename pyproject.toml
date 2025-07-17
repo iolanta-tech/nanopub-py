@@ -148,6 +148,7 @@ no_implicit_optional = false
 markers = [
     "no_rsa_key: mark a test as a test only run when there is no nanopub RSA key setup.",
     "network: mark a test that requires network access.",
+    "flaky: mark test as flaky to rerun it on failure",
 ]
 filterwarnings = [
     "ignore:.*ConjunctiveGraph is deprecated.*:DeprecationWarning" # rdflib warning from the parsers, already using Dataset in our own code, see also: https://github.com/RDFLib/rdflib/issues/3064
