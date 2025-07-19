@@ -9,6 +9,12 @@ HDL = Namespace("https://hdl.handle.net/")
 def looks_like_handle(value: str) -> bool:
     return isinstance(value, str) and not value.startswith("http")
 
+def looks_like_url(s: str) -> bool:
+    return s.startswith("http://") or s.startswith("https://")
+
+def handle_to_iri(handle: str) -> rdflib.URIRef:
+    return rdflib.URIRef(f"https://hdl.handle.net/{handle}")
+
 
 def convert_jsonschema_to_shacl(json_schema: dict) -> rdflib.Graph:
     g = rdflib.Graph()
