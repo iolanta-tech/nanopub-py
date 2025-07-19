@@ -317,6 +317,7 @@ def from_assertion(
         profile=load_profile(),
         derived_from=was_derived_from,
         add_pubinfo_generated_time=True,
+        add_prov_generated_time=True,
         attribute_publication_to_profile=True,
     )
 
