@@ -140,7 +140,7 @@ coverage html
 
 ## License
 
-nanopub-java is free software under the Apache License. See [LICENSE](LICENSE).
+nanopub-py is free software under the Apache License. See [LICENSE](LICENSE).
 
 
 ## Copyright
