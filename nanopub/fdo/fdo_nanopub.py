@@ -26,7 +26,11 @@ class FdoNanopub(Nanopub):
     
     def __init__(self, fdo_id: rdflib.URIRef | str, label: str, fdo_profile: str = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fdo_uri = to_hdl_uri(fdo_id)  
+        if looks_like_url(fdo_id) is True:
+           self.fdo_uri = rdflib.URIRef(fdo_id)
+        elif looks_like_handle(fdo_id) is True:
+            self.fdo_uri = handle_to_iri(fdo_id)
+         
         self.fdo_profile = fdo_profile
         self._init_core_fdo_triples(label)
 
