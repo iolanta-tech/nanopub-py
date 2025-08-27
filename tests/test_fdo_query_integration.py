@@ -4,7 +4,7 @@ from nanopub.fdo.fdo_query import FdoQuery
 
 @pytest.fixture(scope="module")
 def fdo_query():
-    client = NanopubClient()
+    client = NanopubClient(query_urls=['https://query.petapico.org/api/'])
     return FdoQuery(client)
 
 def test_text_search(fdo_query):
