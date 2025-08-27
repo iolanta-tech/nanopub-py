@@ -41,6 +41,7 @@ class NanopubClient:
         self,
         use_test_server=False,
         use_server=NANOPUB_REGISTRY_URLS[0],
+        query_urls=None,
     ):
         self.use_test_server = use_test_server
         if use_test_server:
@@ -51,7 +52,8 @@ class NanopubClient:
             self.use_server = use_server
             if use_server not in NANOPUB_REGISTRY_URLS:
                 log.warn(f"{use_server} is not in our list of nanopub servers. {', '.join(NANOPUB_REGISTRY_URLS)}\nMake sure you are using an existing Nanopub server.")
-
+        if query_urls is not None:
+            self.query_urls = query_urls
 
     def find_nanopubs_with_text(
         self, text: str, pubkey: str = None, filter_retracted: bool = True
