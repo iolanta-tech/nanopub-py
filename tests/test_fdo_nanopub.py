@@ -46,6 +46,10 @@ def test_init_with_fdo_profile():
 def test_init_core_fdo_triples_no_profile():
     fdo = FdoNanopub("21.T11966/test", "NoProfile")
     assert isinstance(fdo, FdoNanopub)
+    
+def test_init_core_fdo_triples_with_iri():
+    fdo = FdoNanopub("https://example.com/fdo", "WithIri")
+    assert isinstance(fdo, FdoNanopub)
 
 @pytest.mark.parametrize("fdo_id", [FAKE_HANDLE, HDL[FAKE_HANDLE]])
 def test_initial_fdo_triples(fdo_id):
