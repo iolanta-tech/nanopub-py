@@ -21,12 +21,18 @@ class FdoRecord:
     ):
         self.id: Optional[str] = None
         self.tuples: dict[URIRef, Union[Literal, URIRef]] = {}
+        self.profile_uri: Optional[Union[str, URIRef]] = None
         
         if assertion:
             # Init from assertion graph
             for s, p, o in assertion:
-                if (p == DCTERMS.conformsTo or p == FDOC.hasFdoProfile) and self.id is None:
-                    self.id = self.extract_handle(o)
+                if self.id is None:
+                    self.id = s
+                if str(p) == str(FDOC.profile):
+                    self.set_profile(str(o))
+                    
+                if str(p) == str(DCTERMS.conformsTo) or str(p) == str(FDOC.hasFdoProfile):
+                    self.profile_uri = o
 
                 if p == FDOF.isMaterializedBy:
                     self.set_data_ref(o)
@@ -40,7 +46,7 @@ class FdoRecord:
                     else:
                         if existing != o:
                             self.tuples[p] = [existing, o]
-            if self.id is None:
+            if self.profile_uri is None:
                 raise ValueError("Missing required FDO profile statement")
 
         if assertion is None:
@@ -56,6 +62,9 @@ class FdoRecord:
 
             # Extract handle from profile_uri if possible
             self.id = self.extract_handle(profile_uri) if self.id is None else self.id
+        
+        if profile_uri:
+            self.set_profile(profile_uri) # override if given explicitly
 
     def __str__(self) -> str:
         label = self.get_label() or "No label"
@@ -90,9 +99,14 @@ class FdoRecord:
             g.add((s, p, o))
         return g
 
-    def get_profile(self) -> Optional[URIRef]:
+    def get_profile(self) -> Optional[Union[str, URIRef]]:
+        if self.profile_uri:
+            return self.profile_uri
         val = self.tuples.get(DCTERMS.conformsTo) or self.tuples.get(FDOC.hasFdoProfile)
-        return URIRef(val) if val else None
+        if val:
+            return URIRef(val)
+
+        return None
 
     def get_data_ref(self) -> Optional[Union[URIRef, List[URIRef]]]:
         val = self.tuples.get(FDOF.isMaterializedBy)
