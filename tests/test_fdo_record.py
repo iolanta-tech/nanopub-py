@@ -31,7 +31,7 @@ def test_init_from_graph():
 
     assert record.get_profile() == URIRef(PROFILE_URI)
     assert record.get_label() == LABEL
-    assert record.get_id() == "abc123"
+    assert record.get_id() == subj
 
 def test_init_graph_missing_profile_raises():
     g = Graph()
