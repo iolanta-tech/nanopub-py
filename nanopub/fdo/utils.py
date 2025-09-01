@@ -1,9 +1,33 @@
 import rdflib
-from rdflib import RDF, URIRef, Literal, Namespace
+from rdflib import RDF, URIRef, Literal, Namespace, Graph
 from rdflib.namespace import SH, XSD
 
 EX = Namespace("https://example.org/shapes")
 HDL = Namespace("https://hdl.handle.net/")
+
+NUMERIC_SHACL_PROPS = [
+    SH.maxCount,
+    SH.minCount,
+    SH.minExclusive,
+    SH.maxExclusive,
+    SH.minInclusive,
+    SH.maxInclusive
+]
+
+def fix_numeric_shacl_constraints(shape_graph: Graph) -> Graph:
+    """
+    Convert string literals used as SHACL numeric constraints into xsd:integer literals.
+    """
+    for prop in NUMERIC_SHACL_PROPS:
+        for s, p, o in list(shape_graph.triples((None, prop, None))):
+            if not (o.datatype == XSD.integer):
+                try:
+                    value = int(str(o))
+                    shape_graph.set((s, p, Literal(value, datatype=XSD.integer)))
+                except ValueError:
+                    pass
+
+    return shape_graph
 
 
 def looks_like_handle(value: str) -> bool:
