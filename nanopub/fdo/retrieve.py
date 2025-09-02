@@ -30,7 +30,7 @@ def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> FdoRec
     raise ValueError(f"FDO not found: {iri_or_handle}")
 
 
-def resolve_in_nanopub_network(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> Optional[Nanopub]:
+def resolve_in_nanopub_network(iri_or_handle: Union[str, URIRef], conf: Optional[NanopubConf] = None) -> Optional[Nanopub]:
     query_id = "RAs0HI_KRAds4w_OOEMl-_ed0nZHFWdfePPXsDHf4kQkU"
     endpoint = "get-fdo-by-id"
     query_url = f"https://query.knowledgepixels.com/api/{query_id}/"
@@ -42,19 +42,16 @@ def resolve_in_nanopub_network(iri_or_handle: str, conf: Optional[NanopubConf] =
         np = Nanopub(iri_or_handle, conf=fetchConf)
     else:
         data = NanopubClient()._query_api_parsed(
-            params={"fdoid": iri_or_handle},
+            params={"fdoid": str(iri_or_handle)},
             endpoint=endpoint,
             query_url=query_url,
         )
-        if not data:
+        if not data or len(data) == 0:
             return None
         else:
             np_uri = data[0].get("np")
             np = Nanopub(np_uri)
-    if np is not None:
-        return np
-    return None
-    
+    return np
     
 
 def retrieve_record_from_id(iri_or_handle: str):

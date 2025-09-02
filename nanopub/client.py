@@ -320,22 +320,19 @@ class NanopubClient:
             parsed["label"] = result["label"]["value"]
         parsed["date"] = result["date"]["value"]
         return parsed
-
-    def _query_api_csv(self, params: dict, endpoint: str, query_url: str) -> requests.Response:
-        """Query a Nanopub Query endpoint and request CSV response."""
+    
+    def _query_api_csv(self, params, endpoint, query_url) -> str:
         headers = {"Accept": "text/csv"}
         url = query_url + endpoint
-        return requests.get(url, params=params, headers=headers).text
+        response = requests.get(url, params=params, headers=headers)
+        response.raise_for_status()
+        response.encoding = 'utf-8-sig'
+        return response.text
 
-    def _query_api_parsed(
-        self,
-        params: Dict[str, str],
-        endpoint: str,
-        query_url: str,
-    ) -> List[dict]:
-        """Query a Nanopub Query endpoint and return parsed CSV response."""
-        csv_text = self._query_api_csv(params, endpoint=endpoint, query_url=query_url)
-        reader = csv.DictReader(StringIO(csv_text))
+    def _query_api_parsed(self, params, endpoint, query_url):
+        csv_text = self._query_api_csv(params, endpoint, query_url)
+        csv_text = csv_text.strip()
+        reader = csv.DictReader(line for line in StringIO(csv_text) if line.strip())
         return list(reader)
     
     def query_sparql(self, query: str, return_format: str = "json") -> Union[List[dict], str]:
