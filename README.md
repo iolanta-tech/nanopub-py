@@ -1,6 +1,6 @@
 [![nanopub](https://img.shields.io/badge/rsd-nanopub-00a3e3.svg)](https://www.research-software.nl/software/nanopub)
 [![Tests and update docs](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml) [![Publish to PyPI](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml)
-[![Coverage Status](https://coveralls.io/repos/github/fair-workflows/nanopub/badge.svg?branch=main)](https://coveralls.io/github/fair-workflows/nanopub?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/Nanopublication/nanopub-py/badge.svg)](https://coveralls.io/github/Nanopublication/nanopub-py)
 [![PyPI version](https://badge.fury.io/py/nanopub.svg)](https://badge.fury.io/py/nanopub)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4491/badge)](https://bestpractices.coreinfrastructure.org/projects/4491)
 [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu)
@@ -94,9 +94,53 @@ for s, p, o in publication.assertion:
 See the [development page](https://nanopublication.github.io/nanopub-py/getting-started/development/) on the documentation website.
 
 
+## Tests
+
+To run tests: 
+
+Install dependencies (if not already installed):
+
+```
+pip install pytest
+```
+
+Run tests:
+
+```
+pytest
+```
+
+## Test coverage
+
+To generate a test coverage report for this library:
+
+Install dependencies (if not already installed):
+
+```
+pip install coverage pytest
+```
+
+Run the tests with coverage tracking:
+
+```
+coverage run -m pytest
+```
+
+View a terminal summary:
+
+```
+coverage report
+```
+
+Or generate a detailed HTML report
+
+```
+coverage html
+```
+
 ## License
 
-nanopub-java is free software under the Apache License. See [LICENSE](LICENSE).
+nanopub-py is free software under the Apache License. See [LICENSE](LICENSE).
 
 
 ## Copyright
